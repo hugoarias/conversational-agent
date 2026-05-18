@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          python -m pytest tests/ -v --cov=app --cov-report=xml
+          python -m pytest tests/ -v --cov=app --cov-report=xml:coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -44,7 +44,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: backend/coverage.xml
           flags: backend
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+          verbose: true
 
   # ── Frontend: React / Vite tests + build ─────────────────────────────────
   frontend:
