@@ -1,6 +1,7 @@
 # Conversation Agent
 
 [![CI](https://github.com/hugoarias/conversational-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/hugoarias/conversational-agent/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/hugoarias/conversational-agent/graph/badge.svg)](https://codecov.io/gh/hugoarias/conversational-agent)
 
 A fully offline, real-time conversational voice agent.Speak into your microphone — the agent transcribes your speech, generates a response with a local LLM, and speaks it back.
 
