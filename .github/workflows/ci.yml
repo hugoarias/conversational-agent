@@ -42,14 +42,14 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./backend/coverage.xml
+          files: backend/coverage.xml
           flags: backend
           fail_ci_if_error: true
           verbose: true
 
-  # ── Frontend: React / Vite build ─────────────────────────────────────────
+  # ── Frontend: React / Vite tests + build ─────────────────────────────────
   frontend:
-    name: Frontend — Build
+    name: Frontend — Tests & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -66,5 +66,16 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
+      - name: Run tests with coverage
+        run: cd frontend && npm run test:coverage
+
       - name: Build
         run: cd frontend && npm run build
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: frontend/coverage/lcov.info
+          flags: frontend
+          fail_ci_if_error: false

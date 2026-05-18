@@ -91,3 +91,50 @@ def test_synthesize_sets_voice_for_language(mock_tmpfile, mock_open, mock_unlink
     set_calls = [c for c in mock_engine.setProperty.call_args_list if c[0][0] == "voice"]
     assert len(set_calls) == 1
     assert set_calls[0][0][1] == voice_es.id
+
+
+def test_find_voice_matches_macos_bytes_language():
+    """macOS voices expose language as bytes in the `languages` list."""
+    voice_fr = MagicMock()
+    voice_fr.id = "com.apple.speech.synthesis.voice.thomas"
+    voice_fr.languages = [b"fr_FR"]
+
+    engine = _make_mock_engine(voices=[voice_fr])
+    result = _find_voice_for_language(engine, "fr")
+    assert result == voice_fr.id
+
+
+def test_find_voice_matches_macos_str_language():
+    """macOS voices may also expose language as a plain string."""
+    voice_de = MagicMock()
+    voice_de.id = "com.apple.speech.synthesis.voice.anna"
+    voice_de.languages = ["de_DE"]
+
+    engine = _make_mock_engine(voices=[voice_de])
+    result = _find_voice_for_language(engine, "de")
+    assert result == voice_de.id
+
+
+@patch("app.services.pyttsx3_tts.pyttsx3.init")
+@patch("app.services.pyttsx3_tts.os.unlink")
+@patch("builtins.open", create=True)
+@patch("app.services.pyttsx3_tts.tempfile.NamedTemporaryFile")
+def test_synthesize_no_match_uses_default_voice(mock_tmpfile, mock_open, mock_unlink, mock_init):
+    """When no voice matches the language, default voice is used (no setProperty('voice'))."""
+    wav_bytes = make_minimal_wav()
+    mock_tmpfile.return_value.__enter__.return_value.name = "fake.wav"
+    mock_open.return_value.__enter__.return_value.read.return_value = wav_bytes
+
+    voice_en = MagicMock()
+    voice_en.id = r"HKEY_LOCAL_MACHINE\...\TTS_MS_EN-US_ZIRA_11_0"
+    voice_en.languages = []
+
+    mock_engine = MagicMock()
+    mock_engine.getProperty.side_effect = lambda p: [voice_en] if p == "voices" else None
+    mock_init.return_value = mock_engine
+
+    svc = Pyttsx3TTSService()
+    svc.synthesize("Bonjour le monde", language="fr")
+
+    set_voice_calls = [c for c in mock_engine.setProperty.call_args_list if c[0][0] == "voice"]
+    assert len(set_voice_calls) == 0
