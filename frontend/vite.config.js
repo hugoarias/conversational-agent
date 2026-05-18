@@ -19,7 +19,13 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.{js,jsx}'],
-      exclude: ['src/main.jsx', 'src/test/**'],
+      exclude: [
+        'src/main.jsx',          // app entry point
+        'src/test/**',           // test setup
+        '**/*.test.{js,jsx}',   // test files themselves
+        'src/App.jsx',           // integration root; tested via components
+        'src/hooks/useVAD.js',   // requires AudioWorklet + MediaDevices
+      ],
     },
   },
 });
